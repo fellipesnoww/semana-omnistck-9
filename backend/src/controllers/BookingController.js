@@ -15,6 +15,13 @@ module.exports = {
 
         await booking.populate('spot').populate('user').execPopulate();     //Faz com que o Mongo popule os dados dos Spots e dos user alem dos ids
 
+        //Procura uma conexao em tempo real para o dono do spot
+        const ownerSocket = req.connectedUsers[booking.spot.user];
+
+        if(ownerSocket){
+            req.io.to(ownerSocket).emit('booking_request', booking);
+        }
+
         return res.json(booking);
     }
 }

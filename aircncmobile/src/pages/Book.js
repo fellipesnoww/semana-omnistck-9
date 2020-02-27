@@ -1,6 +1,7 @@
 import React, {userState, useState} from 'react';
 import {SafeAreaView, View, Text, StyleSheet, AsyncStorage, TextInput, TouchableOpacity, Alert, Image} from 'react-native'
-import api from '../services/api'
+import api from '../services/api';
+import logo from '../assets/logo.png';
 
 
 export default function Book({navigation}){
@@ -9,13 +10,12 @@ export default function Book({navigation}){
 
     async function handleSubmit(){
         const user_id = await AsyncStorage.getItem('user');
-        console.log(spot);
-        
+                
         await api.post(`/spots/${spot._id}/bookings`,{date},{
             headers: {user_id}
         });
 
-        Alert.alert("Solicitação de Resereva enviada");
+        Alert.alert("Solicitação de Reserva enviada");
 
         navigation.navigate('List');
     }
@@ -26,6 +26,7 @@ export default function Book({navigation}){
 
     return (
         <SafeAreaView style={styles.droidSafeArea}>
+            <Image style={styles.logo} source={logo}/>
             <Text style={styles.confirm}>Confirmando dados do Spot</Text>
             <View style={styles.spotData}>
                 <Image style={styles.thumbnail} source={{ uri: spot.thumbnail_url}} />
@@ -61,7 +62,13 @@ const styles = StyleSheet.create({
     droidSafeArea: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? 25 : 0,
-        margin: 20        
+        margin: 20,      
+    },
+  
+    logo:{
+        marginLeft: 100,
+        marginTop: 20,
+        marginBottom: 20
     },
 
     confirm:{

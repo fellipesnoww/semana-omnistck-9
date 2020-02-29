@@ -1,40 +1,46 @@
 import React, {userState, useState} from 'react';
-import {SafeAreaView, View, Text, StyleSheet, AsyncStorage, TextInput, TouchableOpacity, Alert, Image} from 'react-native'
+import {SafeAreaView, KeyboardAvoidingView, View, Text, StyleSheet, AsyncStorage, TextInput, TouchableOpacity, Alert, Image, BackHandler} from 'react-native'
 import api from '../services/api';
 import logo from '../assets/logo.png';
 
 
 export default function Book({navigation}){
-    const spot = navigation.getParam('spotToReserve');       //Busca o id dentro do navigation,
+    const spot = navigation.getParam('spotToReserve');       //Busca o spot dentro do navigation
+    const urlExpo = navigation.getParam('urlExpo');     
+
     const [date, setDate] = useState();
 
     async function handleSubmit(){
         const user_id = await AsyncStorage.getItem('user');
+                        
+        if(!date || date === ""){
+            Alert.alert("Por favor informe uma data válida!");            
+        } else{
+            await api.post(`/spots/${spot._id}/bookings`,{date},{
+                headers: {user_id}
+            });
+            
+            Alert.alert("Solicitação de Reserva enviada");
+            
+            navigation.navigate('List');            
+        }
                 
-        await api.post(`/spots/${spot._id}/bookings`,{date},{
-            headers: {user_id}
-        });
-
-        Alert.alert("Solicitação de Reserva enviada");
-
-        navigation.navigate('List');
     }
 
     function handleCancel(){
         navigation.navigate('List');
     }
 
+  
     return (
-        <SafeAreaView style={styles.droidSafeArea}>
+        <KeyboardAvoidingView behavior="padding" style={styles.droidSafeArea}>
             <Image style={styles.logo} source={logo}/>
             <Text style={styles.confirm}>Confirmando dados do Spot</Text>
             <View style={styles.spotData}>
-                <Image style={styles.thumbnail} source={{ uri: spot.thumbnail_url}} />
+                <Image style={styles.thumbnail} source={{ uri: spot.thumbnail_url.replace('localhost', urlExpo)}} />
                 <Text style={styles.spotDetails}>Empresa: {spot.company}</Text>
                 <Text style={styles.spotDetails}>Preço: {spot.price ? `R$${spot.price}/dia` : "GRATUITO"}</Text>
             </View>
-
-
              <Text style={styles.label}>Data de interesse * </Text>
                 <TextInput 
                     style={styles.input}
@@ -54,7 +60,7 @@ export default function Book({navigation}){
                     <Text style={styles.textButton}>Cancelar</Text>
                 </TouchableOpacity>
 
-        </SafeAreaView>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -80,6 +86,19 @@ const styles = StyleSheet.create({
         
     },
 
+    textButton:{
+        color: '#fff',
+        fontWeight: "bold"
+    },
+
+    thumbnail:{
+        marginTop: 10,
+        width: 200,
+        height: 120,
+        resizeMode: 'cover',
+        borderRadius: 2,
+    },
+
     spotData:{
         alignItems: 'center',
         justifyContent: 'center',
@@ -89,16 +108,14 @@ const styles = StyleSheet.create({
     spotDetails:{
         fontWeight: 'bold',
         fontSize: 20,
-        color: '#444',
-        marginBottom: 8,
+        color: '#444',        
         marginTop: 15,
     },
 
     label:{
         fontWeight: 'bold',
         color: '#444',
-        marginBottom: 8,
-        marginTop: 45,
+        marginBottom: 8,        
     },
 
     button:{
@@ -106,12 +123,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#f05a5b',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 2
+        borderRadius: 2,        
     },
 
     cancelButton:{
         marginTop: 10,
         backgroundColor: '#ccc',
+        color: '#fff',
+        fontWeight: "bold"
     },
 
     input:{

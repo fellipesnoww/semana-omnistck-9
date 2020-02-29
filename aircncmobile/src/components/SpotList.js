@@ -22,7 +22,7 @@ function SpotList({tech, navigation}){
 
     //Recebe o id do Spot como parametro e envia pra outra tela
     function handleNavigate(spotToReserve){        
-        navigation.navigate('Book', {spotToReserve});
+        navigation.navigate('Book', {spotToReserve, urlExpo});
     }    
     
     return (

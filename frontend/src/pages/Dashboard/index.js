@@ -25,8 +25,7 @@ export default function Dashboard(){
 
         //socket.emit('omni', 'Stack');
 
-        socket.on('booking_request', data => {
-            console.log(data)
+        socket.on('booking_request', data => {            
             setRequests([...requests, data]);  //Copia todos os dados que ja tem na request e adiciona a nova no final
         });
     }, [requests, socket])
@@ -45,14 +44,16 @@ export default function Dashboard(){
 
 
     async function handleAccept(id){
-        await api.post(`/bookings/${id}/approvals`);
+        const spot_user_id = localStorage.getItem('user');        
+        await api.post(`/bookings/${id}/approvals`, {}, {headers: {spot_user_id}});
 
         //Seta novamente as requests que possuem ids diferente da aprovada
         setRequests(requests.filter(request => request._id !== id));
     }
 
     async function handleReject(id){
-        await api.post(`/bookings/${id}/rejections`);
+        const spot_user_id = localStorage.getItem('user');
+        await api.post(`/bookings/${id}/rejections`,{}, {headers: {spot_user_id}});
 
         //Seta novamente as requests que possuem ids diferente da reprovada
         setRequests(requests.filter(request => request._id !== id));

@@ -2,28 +2,29 @@ import React, {useEffect, useState} from 'react';
 import {withNavigation} from 'react-navigation';        //Como o SpotList nao é uma rota, é necessario o withNavigation para encaminhar o usuario para outro lugar
 import {View, Text, StyleSheet, FlatList, Image, TouchableOpacity} from 'react-native';
 import api from '../services/api';
+import { render } from 'react-dom';
 
 //Desestrutura o props (parametro) pegando somente o atributo tech
 function SpotList({tech, navigation}){
     const [spots, setSpots] = useState([]);
+    const [urlExpo, setUrlExpo] = useState("");
 
     useEffect(() => {
         async function loadSpots(){
             const response = await api.get("/spots",{
                 params: {tech}
             })
-        
+            setUrlExpo("192.168.86.56");
             setSpots(response.data);
         }
-
         loadSpots();
     },[]);
 
     //Recebe o id do Spot como parametro e envia pra outra tela
     function handleNavigate(spotToReserve){        
         navigation.navigate('Book', {spotToReserve});
-    }
-
+    }    
+    
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Empresas que usam <Text style={styles.bold}>{tech}</Text></Text>
@@ -33,9 +34,9 @@ function SpotList({tech, navigation}){
                 keyExtractor={spot => spot._id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                renderItem={({item}) => (
+                renderItem={({item}) => (                    
                     <View style={styles.listItem}>
-                        <Image style={styles.thumbnail} source={{ uri: item.thumbnail_url}} />
+                        <Image source={{ uri: item.thumbnail_url.replace("localhost", urlExpo)}} style={styles.thumbnail}/>
                         <Text style={styles.company}>{item.company}</Text>
                         <Text style={styles.price}>{item.price ? `R$${item.price}/dia` : "GRATUITO"}</Text>
                         <TouchableOpacity onPress={() => handleNavigate(item)} style={styles.button}>

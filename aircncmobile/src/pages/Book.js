@@ -1,20 +1,24 @@
 import React, {userState, useState} from 'react';
-import {SafeAreaView, KeyboardAvoidingView, View, Text, StyleSheet, AsyncStorage, TextInput, TouchableOpacity, Alert, Image, BackHandler} from 'react-native'
+import {SafeAreaView, StatusBar, KeyboardAvoidingView, View, Text, StyleSheet, AsyncStorage, TextInput, TouchableOpacity, Alert, Image, BackHandler} from 'react-native';
 import api from '../services/api';
 import logo from '../assets/logo.png';
+import DropdownAlert from 'react-native-dropdownalert';
+import { AlertHelper } from './AlertHelper';
 
 
 export default function Book({navigation}){
+    
     const spot = navigation.getParam('spotToReserve');       //Busca o spot dentro do navigation
     const urlExpo = navigation.getParam('urlExpo');     
 
     const [date, setDate] = useState();
-
+    
     async function handleSubmit(){
         const user_id = await AsyncStorage.getItem('user');
                         
         if(!date || date === ""){
-            Alert.alert("Por favor informe uma data válida!");            
+            //Alert.alert("Por favor informe uma data válida!");  
+            AlertHelper.show('error','Erro', 'Ops! Você precisa informar uma data.')
         } else{
             await api.post(`/spots/${spot._id}/bookings`,{date},{
                 headers: {user_id}
@@ -23,17 +27,15 @@ export default function Book({navigation}){
             Alert.alert("Solicitação de Reserva enviada");
             
             navigation.navigate('List');            
-        }
-                
-    }
+        }                
+    }          
 
     function handleCancel(){
         navigation.navigate('List');
     }
-
   
     return (
-        <KeyboardAvoidingView behavior="padding" style={styles.droidSafeArea}>
+        <View behavior="padding" style={styles.droidSafeArea}>
             <Image style={styles.logo} source={logo}/>
             <Text style={styles.confirm}>Confirmando dados do Spot</Text>
             <View style={styles.spotData}>
@@ -58,9 +60,15 @@ export default function Book({navigation}){
 
                 <TouchableOpacity onPress={handleCancel} style={[styles.button, styles.cancelButton]}>
                     <Text style={styles.textButton}>Cancelar</Text>
-                </TouchableOpacity>
-
-        </KeyboardAvoidingView>
+                </TouchableOpacity>                
+                
+                <DropdownAlert
+                defaultContainer={{ paddingTop: StatusBar.currentHeight, flexDirection: 'row' }}
+                ref={ref => AlertHelper.setDropDown(ref)}
+                onClose={() => AlertHelper.invokeOnClose()}
+                />
+        </View>
+       
     )
 }
 

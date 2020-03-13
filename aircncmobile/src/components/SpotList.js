@@ -4,17 +4,19 @@ import {View, Text, StyleSheet, FlatList, Image, TouchableOpacity} from 'react-n
 import api from '../services/api';
 import { render } from 'react-dom';
 
+
 //Desestrutura o props (parametro) pegando somente o atributo tech
 function SpotList({tech, navigation}){
     const [spots, setSpots] = useState([]);
     const [urlExpo, setUrlExpo] = useState("");
+    
 
     useEffect(() => {
         async function loadSpots(){
             const response = await api.get("/spots",{
                 params: {tech}
             })
-            setUrlExpo("192.168.86.56");
+            setUrlExpo("10.254.207.47");
             setSpots(response.data);
         }
         loadSpots();
@@ -23,7 +25,8 @@ function SpotList({tech, navigation}){
     //Recebe o id do Spot como parametro e envia pra outra tela
     function handleNavigate(spotToReserve){        
         navigation.navigate('Book', {spotToReserve, urlExpo});
-    }    
+    }
+
     
     return (
         <View style={styles.container}>
@@ -44,7 +47,7 @@ function SpotList({tech, navigation}){
                         </TouchableOpacity>
                     </View>
                 )}
-            />
+            />            
         </View>
 )
 }

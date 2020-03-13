@@ -3,6 +3,8 @@ import {Link} from 'react-router-dom';
 import api from '../../services/api';
 import socketio from 'socket.io-client';
 import './styles.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Dashboard(){
     const [spots, setSpots] = useState([]);
@@ -43,9 +45,34 @@ export default function Dashboard(){
     },[]); //Cada variavel dentro do array alterada a funcao useEffect é executada
 
 
+    function notify(approvedBooking) {
+        if(approvedBooking){
+            toast.success('❣ Sucesso! Requisição APROVADA!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+            });
+        } else{
+            toast.success('❣ Sucesso! Requisição REPROVADA!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true
+                });
+        }
+        
+    }
+
     async function handleAccept(id){
         const spot_user_id = localStorage.getItem('user');        
         await api.post(`/bookings/${id}/approvals`, {}, {headers: {spot_user_id}});
+        
+        notify(true);
 
         //Seta novamente as requests que possuem ids diferente da aprovada
         setRequests(requests.filter(request => request._id !== id));
@@ -54,6 +81,8 @@ export default function Dashboard(){
     async function handleReject(id){
         const spot_user_id = localStorage.getItem('user');
         await api.post(`/bookings/${id}/rejections`,{}, {headers: {spot_user_id}});
+
+        notify(false);
 
         //Seta novamente as requests que possuem ids diferente da reprovada
         setRequests(requests.filter(request => request._id !== id));
@@ -85,6 +114,17 @@ export default function Dashboard(){
             <Link to="/new">
                 <button className="btn">Cadastrar Novo Spot</button>
             </Link>
+            <ToastContainer className="notify"
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnVisibilityChange
+            draggable
+            pauseOnHover
+            />       
         </>
     )
 }

@@ -1,21 +1,38 @@
 import React, {useState} from 'react';
 import api from '../../services/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Login({ history }){
     const [email, setEmail] = useState('');
   
     async function handleSubmit(event){
       event.preventDefault();
-      const response = await api.post('/sessions', {email});
+      if(email === null || email === ''){
+          notify();
+      } else{
+        const response = await api.post('/sessions', {email});  
+      
+        const {_id} = response.data;
+    
+        localStorage.setItem('user', _id);    //Salva o id do usuario localmente no navegador
   
-      console.log(response);
-      const {_id} = response.data;
-  
-      localStorage.setItem('user', _id);    //Salva o id do usuario localmente no navegador
-
-      history.push('/dashboard');
+        history.push('/dashboard');
+      }
+      
     } 
     
+    function notify() {
+        toast.error('❌ Erro! Você precisa informar um e-mail válido', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+            });
+    }
+
     return (
     <>
         <p>
@@ -32,8 +49,19 @@ export default function Login({ history }){
                 onChange={event => setEmail(event.target.value)}
             />
 
-            <button className="btn" type="submit">Entrar</button>
+            <button className="btn" type="submit">Entrar</button>            
         </form>
+        <ToastContainer toastClassName="notify"
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnVisibilityChange
+            draggable
+            pauseOnHover
+            />       
     </>
       );
 }
